@@ -11,7 +11,7 @@ Students are expected to:
 Student Info
 =======================
 
-* Name: Nguyen Nhu Duy
-* ID: 22BI13123
+* Name: Nguyen Tien Dat
+* ID: 22BI13079
 * Group ID: 2
 * Project Name: Movie Review Platform
