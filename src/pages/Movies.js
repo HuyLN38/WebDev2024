@@ -5,6 +5,7 @@ import MovieDetails from '../components/MovieDetails';
 import { fetchMovieData } from '../utils/api';
 import { getCookie } from '../contexts/AuthContext';
 import { getFavorites } from '../utils/auth';
+import SearchBar from '../components/SearchBar';
 
 const Movies = () => {
   const [movies, setMovies] = useState([]);
@@ -17,6 +18,9 @@ const Movies = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [favorites, setFavorites] = useState({});
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+
   const userId = getCookie('userId');
   
 
@@ -33,6 +37,37 @@ const Movies = () => {
     if (genresData && genresData.genres) {
       setGenres(genresData.genres);
     }
+  };
+
+  const handleSearch = async (query) => {
+    setIsSearching(true);
+    setIsLoading(true);
+    const url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=1`;
+    const options = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiODRhMDg2MWQzYjE0ZDliZWY2MWZlM2E1ZmVhYTNiZiIsIm5iZiI6MTcyOTMwMzQyMy45ODQzMzcsInN1YiI6IjY2ZmU2ZWM0Zjg3OGFkZmVkMDg0ZGUxMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.ZKYk6aqobNrqaX3cAP8u3P_5y2xoqkt9nofnBzPW2_s'
+      }
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      setSearchResults(data.results);
+      setTotalPages(data.total_pages);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('Error searching movies:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const clearSearch = () => {
+    setIsSearching(false);
+    setSearchResults([]);
+    fetchMovies();
   };
 
   const fetchMovies = async (page = 1, loadMore = false) => {
@@ -126,6 +161,7 @@ const Movies = () => {
   return (
     <div className="flex flex-col md:flex-row pt-16">
       {/* Filter Top Bar for Small Screens */}
+      
       <div className="md:hidden bg-gray-100 p-4 sticky top-16 z-10">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Filters</h2>
@@ -139,6 +175,15 @@ const Movies = () => {
         {showFilters && (
           <div className="mt-4">
             <div className="mb-4">
+            <SearchBar onSearch={handleSearch} />
+              {isSearching && (
+                <button
+                  onClick={clearSearch}
+                  className="w-full mt-2 bg-red-500 text-white py-2 rounded hover:bg-red-600"
+                >
+                  Clear Search
+                </button>
+              )}
               <h3 className="text-xl font-semibold mb-2">Genres</h3>
               <div className="flex flex-wrap gap-2">
                 {genres.map(genre => (
@@ -185,8 +230,17 @@ const Movies = () => {
       </div>
 
       {/* Sidebar for Medium and Larger Screens */}
-      <div className="hidden md:block w-52 p-4 bg-gray-100 min-h-screen sticky top-16">
+      <div className="hidden md:block w-72 p-4 bg-gray-100 min-h-screen sticky top-16">
         <h2 className="text-2xl font-bold mb-4">Filters</h2>
+        <SearchBar onSearch={handleSearch} />
+        {isSearching && (
+          <button
+            onClick={clearSearch}
+            className="w-full mt-2 bg-red-500 text-white py-2 rounded hover:bg-red-600"
+          >
+            Clear Search
+          </button>
+        )}
         <div className="mb-6">
           <h3 className="text-xl font-semibold mb-2">Genres</h3>
           <div className="flex flex-wrap gap-2">
@@ -233,9 +287,9 @@ const Movies = () => {
 
       {/* Movie List */}
       <div className="flex-1 p-4">
-        <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <AnimatePresence>
-            {movies.map(movie => (
+            {(isSearching ? searchResults : movies).map(movie => (
               <MovieCard
                 key={movie.id}
                 movie={movie}

@@ -22,13 +22,13 @@ const TopBar = ({ user }) => {
   const backgroundColor = useTransform(
     scrollY,
     [0, 20],
-    isHomePage ? ['rgba(31, 41, 55, 0)', 'rgba(31, 41, 55, 0.9)'] : ['rgba(255, 255, 255, 1)', 'rgba(255, 255, 255, 0.0)']
+    isHomePage ? ['rgba(31, 41, 55, 0)', 'rgba(31, 41, 55, 0.9)'] : ['rgba(255, 255, 255, 1)', 'rgba(255, 255, 255, 1)']
   );
 
   const textColor = useTransform(
     scrollY,
     [0, 20],
-    isHomePage ? ['rgba(255, 255, 255, 1)', 'rgba(255, 255, 255, 0.8)'] : ['rgba(0, 0, 0, 1)', 'rgba(0, 0, 0, 0.0)']
+    isHomePage ? ['rgba(255, 255, 255, 1)', 'rgba(255, 255, 255, 0.8)'] : ['rgba(0, 0, 0, 1)', 'rgba(0, 0, 0, 1)']
   );
 
   useEffect(() => {
